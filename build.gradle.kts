@@ -27,15 +27,7 @@ allprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "com.gradleup.shadow")
 
-    repositories {
-        mavenLocal()
-        mavenCentral()
 
-        maven("https://repo.papermc.io/repository/maven-public/")
-        maven("https://repo.auxilor.io/repository/maven-public/")
-        maven("https://jitpack.io")
-        maven("https://mvn.lumine.io/repository/maven-public/")
-    }
 
     dependencies {
         compileOnly("com.willfp:eco:6.67.0")

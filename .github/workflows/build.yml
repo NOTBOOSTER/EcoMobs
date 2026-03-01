@@ -1,0 +1,68 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout EcoMobs
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+
+      - name: Get libreforge version from gradle.properties
+        id: libreforge_version
+        run: |
+          VERSION=$(grep '^libreforge-version=' gradle.properties | cut -d'=' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Clone libreforge
+        run: |
+          git clone --depth 1 --branch ${{ steps.libreforge_version.outputs.version }} \
+            https://github.com/Auxilor/libreforge.git /tmp/libreforge || \
+          git clone --depth 1 https://github.com/Auxilor/libreforge.git /tmp/libreforge
+
+      - name: Build & publish libreforge to Maven Local
+        working-directory: /tmp/libreforge
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build --no-daemon
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build EcoMobs with Gradle
+        run: ./gradlew build --no-daemon
+
+      - name: Get EcoMobs version from gradle.properties
+        id: get_version
+        run: |
+          VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Find built JAR
+        id: find_jar
+        run: |
+          JAR_PATH=$(find . -path "*/build/libs/EcoMobs-*.jar" ! -name "*-sources.jar" | head -n 1)
+          echo "jar_path=$JAR_PATH" >> $GITHUB_OUTPUT
+          echo "jar_name=$(basename $JAR_PATH)" >> $GITHUB_OUTPUT
+
+      - name: Send JAR to Discord via webhook
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            -F "payload_json={\"content\":\"✅ **Build complete!**\n**Version:** \`${{ steps.get_version.outputs.version }}\`\n**Branch:** \`${{ github.ref_name }}\`\n**Commit:** \`${{ github.sha }}\`\n**By:** ${{ github.actor }}\n**Run:** https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            -F "file=@${{ steps.find_jar.outputs.jar_path }};filename=${{ steps.find_jar.outputs.jar_name }}"
