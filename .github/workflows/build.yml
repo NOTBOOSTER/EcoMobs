@@ -23,31 +23,13 @@ jobs:
           distribution: 'temurin'
           java-version: 21
 
-      - name: Get libreforge version from gradle.properties
-        id: libreforge_version
-        run: |
-          VERSION=$(grep '^libreforge-version=' gradle.properties | cut -d'=' -f2)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Clone libreforge
-        run: |
-          git clone --depth 1 --branch ${{ steps.libreforge_version.outputs.version }} \
-            https://github.com/Auxilor/libreforge.git /tmp/libreforge || \
-          git clone --depth 1 https://github.com/Auxilor/libreforge.git /tmp/libreforge
-
-      - name: Build & publish libreforge to Maven Local
-        working-directory: /tmp/libreforge
-        run: |
-          chmod +x ./gradlew
-          ./gradlew build --no-daemon
-
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build EcoMobs with Gradle
+      - name: Build with Gradle
         run: ./gradlew build --no-daemon
 
-      - name: Get EcoMobs version from gradle.properties
+      - name: Get version from gradle.properties
         id: get_version
         run: |
           VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)
