@@ -4,19 +4,6 @@ pluginManagement {
         mavenLocal()
         maven("https://repo.auxilor.io/repository/maven-public/")
         maven("https://repo.papermc.io/repository/maven-public/")
-        maven("https://jitpack.io")
-    }
-}
-
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven("https://repo.auxilor.io/repository/maven-public/")
-        maven("https://repo.papermc.io/repository/maven-public/")
-        maven("https://jitpack.io")
-        maven("https://mvn.lumine.io/repository/maven-public/")
     }
 }
 
