@@ -38,7 +38,7 @@ jobs:
       - name: Find built JAR
         id: find_jar
         run: |
-          JAR_PATH=$(find . -path "*/build/libs/EcoMobs-*.jar" ! -name "*-sources.jar" | head -n 1)
+          JAR_PATH=$(find ./bin -name "EcoMobs*.jar" | head -n 1)
           echo "jar_path=$JAR_PATH" >> $GITHUB_OUTPUT
           echo "jar_name=$(basename $JAR_PATH)" >> $GITHUB_OUTPUT
 
